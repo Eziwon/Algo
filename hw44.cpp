@@ -1,7 +1,7 @@
 // https://modoocode.com/304  random number 생성
+// https://hijuworld.tistory.com/1  processing time 구하기
+// https://www.tutorialspoint.com/cplusplus-program-to-solve-knapsack-problem-using-dynamic-programming  dynamic programming
 
-// brute force
-// dynamic programming
 // branch and bound
 #include <iostream>
 #include <random>
@@ -18,9 +18,10 @@ struct Item
 
 void merge(vector<Item>& items, int left, int mid, int right);
 void mergeSort(vector<Item>& items, int left, int right);
+int max(int a, int b);
+int BruteForce(vector<Item>& items, int size, int capa);
 int Greedy(vector<Item>& items, int size, int capa);
 int DynamicProgramming(vector<Item>& items, int size, int capa);
-int max(int a, int b);
 
 int main(){
     int n;
@@ -53,6 +54,11 @@ int main(){
 
         switch (*algo)
         {
+        case '1':
+            start = clock();
+            maxProfit = BruteForce(items, n, capacity);
+            end = clock();
+            break;
         case '2':
             start = clock();
             maxProfit = Greedy(items, n, capacity);
@@ -67,7 +73,7 @@ int main(){
         }
 
         double elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
-        cout << "\nresult: " << elapsedTime << "/" << maxProfit << endl;
+        cout << "\nresult: " << elapsedTime << "/" << maxProfit << endl << endl;
     }
 
     return 0;
@@ -125,6 +131,22 @@ void mergeSort(vector<Item>& items, int left, int right) {
     merge(items, left, mid, right);
 }
 
+int max(int a, int b){
+    return (a > b) ? a : b;
+}
+
+int BruteForce(vector<Item>& items, int size, int capa){
+    if (size == 0 || capa == 0)
+        return 0;
+    int In, Out;
+    if (items[size-1].weight <= capa) {
+        In = items[size-1].benefit + BruteForce(items, size-1, capa-items[size-1].weight);
+        Out = BruteForce(items, size-1, capa);
+    }
+    else return BruteForce(items, size-1, capa);
+    return max(In, Out);
+}
+
 int Greedy(vector<Item>& items, int size, int capa) {
     mergeSort(items, 0, size-1);
     cout << "\n...Sorting ..." << endl;
@@ -151,32 +173,18 @@ int Greedy(vector<Item>& items, int size, int capa) {
     return benefit;
 }
 
-int max(int a, int b){
-    return (a > b) ? a : b;
-}
-
 int DynamicProgramming(vector<Item>& items, int size, int capa) {
-    vector<vector<int>> dp(size + 1, vector<int>(capa+1, 0));
-    for (int i = 1; i <= size; ++i) {
-        for (int w = 1; w <= capa; ++w) {
-            if (items[i - 1].weight <= w) {
-                dp[i][w] = max(items[i - 1].value + dp[i - 1][w - items[i - 1].weight], dp[i - 1][w]);
-            } else {
-                dp[i][w] = dp[i - 1][w];
-            }
-        }
-    }
-    int W = capa;
+    int B[size+1][capa+1];
 
-    for (int i=0; i<size; i++) {
-        for (int w=0; w<capa; w++) {
-            if (i == 0 || w == 0)
-                dp[i][w] = 0;
-            else if (items[i].weight <= W) 
-                dp[i][w] = max(items[i].benefit + dp[i-1][w-items[i].weight], dp[i-1][w]);
+    for (int i=0; i<=size; i++) {
+        for (int w=0; w<=capa; w++) {
+            if (i == 0 || w == 0)       
+                B[i][w] = 0;
+            else if (items[i-1].weight <= w) 
+                B[i][w] = max(items[i-1].benefit + B[i-1][w-items[i-1].weight], B[i-1][w]);
             else 
-                dp[i][w] = dp[i-1][w];
+                B[i][w] = B[i-1][w];
         }
     }
-    return dp[size][capa];
+    return B[size][capa];
 }
