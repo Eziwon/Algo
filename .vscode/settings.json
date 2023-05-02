@@ -2,6 +2,8 @@
     "files.associations": {
         "random": "cpp",
         "vector": "cpp",
-        "ctime": "cpp"
+        "ctime": "cpp",
+        "queue": "cpp",
+        "iostream": "cpp"
     }
 }
