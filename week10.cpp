@@ -5,11 +5,46 @@
 using namespace std;
 const int num_nodes = 5;
 
+typedef struct h_node {
+    int data;
+    struct g_node *link;
+} head_node;
+
+typedef struct g_node {
+    int city;
+    int distance;
+    struct g_node *link;
+} list_node;
+
 void Read_from_file(int distance[][num_nodes]);
+void Create_array(head_node **my_graph);
+void Insert(int distance[][num_nodes], head_node *my_graph);
+void Display_Lists(head_node *my_graph);
 
 int main () {
+    head_node *my_graph = NULL;
     int distance[num_nodes][num_nodes];
+
+    // Create array
+    Create_array(&my_graph);
+
+    // Print array
+    for (int i=0; i<num_nodes; i++) {
+        cout << i << ": ";
+		cout << my_graph[i].data << ", ";
+		cout << my_graph[i].link << endl;
+    }
+    cout << endl;
+
+    //Read data from file
     Read_from_file(distance);
+
+    // Create list
+	Insert(distance, my_graph);
+
+    // Display
+    Display_Lists(my_graph);	
+
     return 0;
 }
 
@@ -23,4 +58,48 @@ void Read_from_file(int distance[][num_nodes]) {
         cout << endl;
     }
     cout << endl;
+}
+
+void Create_array(head_node **my_graph) {
+    *my_graph = new head_node[num_nodes];
+    for (int i=0; i<num_nodes; i++) {
+        (*my_graph)[i].data = i;
+        (*my_graph)[i].link = NULL;
+    }
+}
+
+void Insert(int distance[][num_nodes], head_node *my_graph) {
+    for (int i=0; i<num_nodes; i++) {
+        for (int j=0; j<num_nodes; j++) {
+            if (distance[i][j] > 0) {
+                list_node *new_node = new list_node;
+                new_node->city = j;
+                new_node->distance = distance[i][j];
+                new_node->link = NULL;
+
+                list_node *temp = my_graph[i].link;
+                if (temp == NULL) 
+                    my_graph[i].link = new_node;
+                else {
+                    list_node *prev = NULL;
+                    while(temp != NULL) {
+                        prev = temp;
+                        temp = temp->link;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Display_Lists(head_node *my_graph){
+	for (int i=0; i<num_nodes; i++){
+		list_node *temp = my_graph[i].link;
+		cout << "From " << i << ": ";
+		while (temp != NULL){
+			cout << temp->city << ", " << temp->distance << "     ";
+			temp = temp->link;
+		}
+		cout << endl;
+	}
 }
